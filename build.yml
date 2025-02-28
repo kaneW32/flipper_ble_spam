@@ -1,0 +1,30 @@
+name: Build Flipper App
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install git cmake gcc-arm-none-eabi build-essential python3-pip -y
+
+      - name: Clone Flipper SDK
+        run: git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
+
+      - name: Build App
+        run: |
+          cd ~/flipperzero-firmware
+          ./fbt launch_app APPSRC=${{ github.workspace }}/ble_spam
+
+      - name: Upload .fap File
+        uses: actions/upload-artifact@v2
+        with:
+          name: ble_spam_fap
+          path: ~/flipperzero-firmware/build/f7-firmware-D/.extapps/*.fap
