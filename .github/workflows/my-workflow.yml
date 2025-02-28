@@ -1,6 +1,6 @@
 name: Build Flipper App
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -24,7 +24,7 @@ jobs:
           ./fbt launch_app APPSRC=${{ github.workspace }}/ble_spam
 
       - name: Upload .fap File
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ble_spam_fap
           path: ~/flipperzero-firmware/build/f7-firmware-D/.extapps/*.fap
