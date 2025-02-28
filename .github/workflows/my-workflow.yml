@@ -19,8 +19,14 @@ jobs:
       - name: Clone Flipper SDK
         run: git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
 
-      - name: List app folder contents  # 🔹 This helps debug missing files
+      - name: List workspace contents
+        run: ls -al ${{ github.workspace }}
+
+      - name: List app folder contents
         run: ls -al ${{ github.workspace }}/ble_spam
+
+      - name: Check manifest formatting
+        run: cat ${{ github.workspace }}/ble_spam/application.fam
 
       - name: Build App
         run: |
