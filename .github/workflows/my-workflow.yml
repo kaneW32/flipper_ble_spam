@@ -1,6 +1,7 @@
 name: Build Flipper App
 
-on: [push]
+on:
+  push:
 
 jobs:
   build:
@@ -13,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install git cmake gcc-arm-none-eabi build-essential python3-pip -y
+          sudo apt install -y git cmake gcc-arm-none-eabi build-essential python3-pip
 
       - name: Clone Flipper SDK
         run: git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
@@ -24,7 +25,7 @@ jobs:
           ./fbt launch_app APPSRC=${{ github.workspace }}/ble_spam
 
       - name: Upload .fap File
-  uses: actions/upload-artifact@v4
-  with:
-    name: ble_spam_fap
-    path: ~/flipperzero-firmware/build/f7-firmware-D/.extapps/*.fap
+        uses: actions/upload-artifact@v4
+        with:
+          name: ble_spam_fap
+          path: ~/flipperzero-firmware/build/f7-firmware-D/.extapps/*.fap
