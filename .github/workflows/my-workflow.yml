@@ -25,7 +25,7 @@ jobs:
           ./fbt launch_app APPSRC=${{ github.workspace }}/ble_spam
 
       - name: Upload .fap File
-        uses: actions/upload-artifact@v2
-        with:
-          name: ble_spam_fap
-          path: ~/flipperzero-firmware/build/f7-firmware-D/.extapps/*.fap
+  uses: actions/upload-artifact@v3
+  with:
+    name: ble_spam_fap
+    path: ~/flipperzero-firmware/build/f7-firmware-D/.extapps/*.fap
