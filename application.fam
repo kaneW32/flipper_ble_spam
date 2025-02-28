@@ -1,0 +1,7 @@
+manifest_version: 1
+id: "ble_spam"
+name: "BLE Spam"
+app_version: "1.0"
+entry_point: "ble_spam"
+author: "YourName"
+license: "MIT"
