@@ -2,8 +2,8 @@ App(
     appid="ble_spam",
     name="BLE Spam",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="ble_spam_app",   # Must match the function name, not the .c file
+    entry_point="ble_spam_app",
     stack_size=1024,
     requires=["gui", "input"],
-    fap_category="Tools",
+    fap_category="Tools"
 )
