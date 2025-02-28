@@ -21,7 +21,7 @@ jobs:
       - name: Build App
         run: |
           cd ~/flipperzero-firmware
-          ./fbt launch_app APPSRC=${{ github.workspace }}/flipper_ble_spam/ble_spam
+          ./fbt launch_app APPSRC=${{ github.workspace }}/flipper_ble_spam/ble_spam.c
 
       - name: Upload .fap File
         uses: actions/upload-artifact@v4
