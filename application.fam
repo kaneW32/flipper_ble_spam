@@ -1,7 +1,9 @@
-manifest_version: 1
-id: "ble_spam"
-name: "BLE Spam"
-app_version: "1.0"
-entry_point: "ble_spam"
-author: "YourName"
-license: "MIT"
+App(
+    appid="ble_spam",
+    name="BLE Spam",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ble_spam",   # This must match your C function name.
+    stack_size=1024,          # Adjust if needed.
+    requires=["gui", "input"],
+    fap_category="Tools",
+)
