@@ -12,8 +12,18 @@
 static uint32_t spam_rate = DEFAULT_SPAM_RATE;
 static bool running = true;
 
-// Function to handle input (button presses)
+// ✅ Fix: Declare fallback if furi_hal_bt_send_adv is missing
+#ifndef furi_hal_bt_send_adv
+void furi_hal_bt_send_adv(const char* name, uint32_t len, bool enable) {
+    UNUSED(name);
+    UNUSED(len);
+    UNUSED(enable);
+}
+#endif
+
+// ✅ Fix: Mark 'context' as unused
 void input_callback(InputEvent* event, void* context) {
+    UNUSED(context);  // ✅ Fixes warning
     if(event->type == InputTypeShort) {
         if(event->key == InputKeyBack) {
             running = false;  // Stop the spam and exit
@@ -35,14 +45,14 @@ int32_t ble_spam_task(void* p) {
     return 0;
 }
 
-// UI rendering function
+// ✅ Fix: Change %d to %lu for uint32_t formatting
 void render_callback(Canvas* canvas, void* context) {
     UNUSED(context);
     canvas_clear(canvas);
     canvas_draw_str(canvas, 10, 10, "BLE Spam Active");
     
     char spam_text[32];
-    snprintf(spam_text, sizeof(spam_text), "Rate: %d ms", spam_rate);
+    snprintf(spam_text, sizeof(spam_text), "Rate: %lu ms", spam_rate);  // ✅ Fix format specifier
     canvas_draw_str(canvas, 10, 30, spam_text);
 
     canvas_draw_str(canvas, 10, 50, "⬅ Slower  ➡ Faster");
