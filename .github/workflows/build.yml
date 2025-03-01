@@ -19,10 +19,15 @@ jobs:
       - name: Clone Flipper SDK
         run: git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
 
+      - name: Move App to Firmware Directory
+        run: |
+          mkdir -p ~/flipperzero-firmware/applications_user
+          cp -r ${{ github.workspace }}/applications_user/ble_spam ~/flipperzero-firmware/applications_user/
+
       - name: Build App
         run: |
           cd ~/flipperzero-firmware
-          ./fbt launch_app APPSRC=${{ github.workspace }}/ble_spam/applications_user/ble_spam.c
+          ./fbt launch_app APPSRC=applications_user/ble_spam
 
       - name: Upload .fap File
         uses: actions/upload-artifact@v4
