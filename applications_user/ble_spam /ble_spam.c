@@ -2,7 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <furi_hal_bt.h>
-#include <furi_thread.h>
+#include <furi/core/thread.h>  // ✅ Corrected import for threading
 
 #define DEFAULT_SPAM_RATE 500  // Default BLE spam rate (ms)
 #define MIN_SPAM_RATE 100      // Fastest speed (ms)
@@ -62,10 +62,8 @@ int32_t ble_spam_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     input_set_callback(input, input_callback, NULL);
 
-    // Start BLE spam in a separate thread
-    FuriThread* spam_thread = furi_thread_alloc();
-    furi_thread_set_stack_size(spam_thread, 1024);
-    furi_thread_set_callback(spam_thread, ble_spam_task);
+    // Start BLE spam in a separate thread ✅ Fixed thread creation
+    FuriThread* spam_thread = furi_thread_alloc_ex("BLE_Spam_Thread", 1024, ble_spam_task, NULL);
     furi_thread_start(spam_thread);
 
     // Main loop
