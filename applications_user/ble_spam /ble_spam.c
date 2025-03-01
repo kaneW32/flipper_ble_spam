@@ -1,8 +1,9 @@
 #include <furi.h>
 #include <gui/gui.h>
+#include <gui/view_port.h>  // ✅ Ensure ViewPort is included
 #include <input/input.h>
 #include <furi_hal_bt.h>
-#include <furi/core/thread.h>  // ✅ Corrected import for threading
+#include <furi/core/thread.h>
 
 #define DEFAULT_SPAM_RATE 500  // Default BLE spam rate (ms)
 #define MIN_SPAM_RATE 100      // Fastest speed (ms)
@@ -24,14 +25,14 @@ void input_callback(InputEvent* event, void* context) {
     }
 }
 
-// ✅ FIXED: `int32_t` return type for `furi_thread_alloc_ex`
+// BLE spam task (runs in a background thread)
 int32_t ble_spam_task(void* p) {
     UNUSED(p);
     while(running) {
         furi_hal_bt_send_adv("Flipper_BLE_Spam", 16, true);
         furi_delay_ms(spam_rate);
     }
-    return 0;  // ✅ Must return an int32_t value
+    return 0;
 }
 
 // UI rendering function
@@ -54,16 +55,14 @@ int32_t ble_spam_app(void* p) {
 
     // Open GUI and input system
     Gui* gui = furi_record_open(RECORD_GUI);
-    Input* input = furi_record_open(RECORD_INPUT);
     
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, NULL);
-    view_port_input_callback_set(view_port, input_callback, NULL);
-    
-    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
-    input_set_callback(input, input_callback, NULL);
+    view_port_input_callback_set(view_port, input_callback, NULL);  // ✅ Corrected input callback
 
-    // Start BLE spam in a separate thread ✅ FIXED: Function signature
+    gui_add_view_port(gui, view_port, GuiLayerFullscreen);
+
+    // Start BLE spam in a separate thread
     FuriThread* spam_thread = furi_thread_alloc_ex("BLE_Spam_Thread", 1024, ble_spam_task, NULL);
     furi_thread_start(spam_thread);
 
@@ -77,7 +76,6 @@ int32_t ble_spam_app(void* p) {
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_INPUT);
     
     return 0;
 }
