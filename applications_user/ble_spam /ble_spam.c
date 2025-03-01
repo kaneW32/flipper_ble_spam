@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <gui/gui.h>
 #include <furi_hal_bt.h>
-#include <furi_thread.h>
+// Removed: #include <furi_thread.h>
 
 #define DEFAULT_SPAM_RATE 500
 
@@ -10,7 +10,7 @@ static bool running = true;
 void ble_spam_task(void* p) {
     UNUSED(p);
     while(running) {
-        // Send BLE advertisement. (Ensure this API is available in your SDK.)
+        // Send BLE advertisement (ensure your SDK supports this function)
         furi_hal_bt_send_adv("Flipper_BLE_Spam", 16, true);
         furi_delay_ms(DEFAULT_SPAM_RATE);
     }
@@ -18,14 +18,13 @@ void ble_spam_task(void* p) {
 
 int32_t ble_spam_app(void* p) {
     UNUSED(p);
-    // Open the GUI record (even if we don't actively use it).
     Gui* gui = furi_record_open(RECORD_GUI);
-
-    running = true;
-    // Create a new thread to run the BLE spamming task.
+    
+    // Create a new thread to run the BLE spam task.
+    // If furi_thread_create is declared in furi.h in your SDK, this should work.
     furi_thread_create(ble_spam_task, NULL, 1024);
-
-    // Main loop – you can add conditions to stop the loop if needed.
+    
+    // Main loop – you could add conditions to stop the loop
     while(running) {
         furi_delay_ms(100);
     }
