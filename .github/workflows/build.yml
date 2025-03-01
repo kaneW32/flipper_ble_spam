@@ -67,6 +67,11 @@ jobs:
           cd ~/flipperzero-firmware
           ./fbt build APPSRC=applications_user/ble_spam
 
+      - name: Find Built .fap File
+        run: |
+          echo "🔍 Searching for .fap files..."
+          find ~/flipperzero-firmware -type f -name "*.fap"
+
       - name: Upload .fap File
         uses: actions/upload-artifact@v4
         with:
