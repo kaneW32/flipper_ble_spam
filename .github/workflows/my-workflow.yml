@@ -19,18 +19,6 @@ jobs:
       - name: Clone Flipper SDK
         run: git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
 
-      - name: List workspace contents
-        run: ls -al ${{ github.workspace }}
-
-      - name: List applications_user folder contents
-        run: ls -al ${{ github.workspace }}/applications_user
-
-      - name: List app folder contents
-        run: ls -al ${{ github.workspace }}/applications_user/ble_spam
-
-      - name: Check manifest formatting
-        run: cat ${{ github.workspace }}/applications_user/ble_spam/application.fam
-
       - name: Build App
         run: |
           cd ~/flipperzero-firmware
