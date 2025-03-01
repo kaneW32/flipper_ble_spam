@@ -19,6 +19,9 @@ jobs:
       - name: Clone Flipper SDK
         run: git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
 
+      - name: Debug Folder Existence
+        run: ls -al ${{ github.workspace }}/applications_user
+
       - name: Move App to Firmware Directory
         run: |
           mkdir -p ~/flipperzero-firmware/applications_user
