@@ -19,10 +19,37 @@ jobs:
       - name: Clone Flipper SDK
         run: git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
 
+      - name: Debug Workspace Structure
+        run: |
+          echo "Listing all files in the workspace:"
+          ls -R ${{ github.workspace }}
+
+      - name: Debug Applications User Folder
+        run: |
+          if [ -d "${{ github.workspace }}/applications_user" ]; then
+            echo "applications_user exists!"
+            ls -R ${{ github.workspace }}/applications_user
+          else
+            echo "ERROR: applications_user folder is MISSING!"
+            exit 1
+          fi
+
+      - name: Debug App Folder Existence
+        run: |
+          if [ -d "${{ github.workspace }}/applications_user/ble_spam" ]; then
+            echo "ble_spam exists!"
+            ls -R ${{ github.workspace }}/applications_user/ble_spam
+          else
+            echo "ERROR: applications_user/ble_spam folder is MISSING!"
+            exit 1
+          fi
+
       - name: Move App to Firmware Directory
         run: |
           mkdir -p ~/flipperzero-firmware/applications_user
           cp -r ${{ github.workspace }}/applications_user/ble_spam ~/flipperzero-firmware/applications_user/
+          echo "Listing files after moving:"
+          ls -R ~/flipperzero-firmware/applications_user
 
       - name: Build App
         run: |
