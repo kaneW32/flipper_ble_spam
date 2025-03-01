@@ -29,7 +29,6 @@ jobs:
           APP_USER_DIR="${{ github.workspace }}/applications_user"
           echo "🔍 Checking for applications_user directory: $APP_USER_DIR"
           ls -ld "$APP_USER_DIR" || echo "❌ Directory not found"
-
           if [ -d "$APP_USER_DIR" ]; then
             echo "✅ applications_user folder exists!"
             ls -R "$APP_USER_DIR"
@@ -38,29 +37,16 @@ jobs:
             exit 1
           fi
 
-      - name: Fix Folder Name and Debug Existence
+      - name: Debug App Folder Existence (Fixed)
         run: |
-          echo "🔍 Checking and renaming 'ble_spam' if necessary..."
-          
-          # List all folders in applications_user
-          echo "📂 Folders in applications_user:"
-          ls -1 ${{ github.workspace }}/applications_user
-          
-          # Find the folder that looks like "ble_spam"
-          for dir in "${{ github.workspace }}/applications_user"/*; do
-            if [[ "$(basename "$dir")" != "ble_spam" ]]; then
-              echo "⚠️ Found a possible wrong folder: '$dir'"
-              mv "$dir" "${{ github.workspace }}/applications_user/ble_spam"
-              echo "✅ Renamed '$dir' to 'ble_spam'"
-            fi
-          done
-          
-          # Verify the folder now exists
-          if [ -d "${{ github.workspace }}/applications_user/ble_spam" ]; then
-            echo "✅ Final check: ble_spam exists!"
-            ls -R "${{ github.workspace }}/applications_user/ble_spam"
+          APP_DIR="${{ github.workspace }}/applications_user/ble_spam"
+          echo "🔍 Checking for application directory: $APP_DIR"
+          ls -ld "$APP_DIR" || echo "❌ Directory not found"
+          if [ -d "$APP_DIR" ]; then
+            echo "✅ ble_spam folder exists!"
+            ls -R "$APP_DIR"
           else
-            echo "❌ ERROR: applications_user/ble_spam folder is STILL MISSING!"
+            echo "❌ ERROR: applications_user/ble_spam folder is MISSING!"
             exit 1
           fi
 
@@ -74,7 +60,7 @@ jobs:
       - name: Build App
         run: |
           cd ~/flipperzero-firmware
-          ./fbt launch_app APPSRC=applications_user/ble_spam
+          ./fbt build APPSRC=applications_user/ble_spam
 
       - name: Upload .fap File
         uses: actions/upload-artifact@v4
