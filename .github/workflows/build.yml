@@ -17,7 +17,7 @@ jobs:
           sudo apt install -y git cmake gcc-arm-none-eabi build-essential python3-pip
 
       - name: Clone Flipper SDK
-        run: git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
+        run: git clone --recursive --branch 1.2.0 https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
 
       - name: Debug Workspace Structure
         run: |
