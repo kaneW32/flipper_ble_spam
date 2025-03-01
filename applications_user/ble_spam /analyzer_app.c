@@ -7,56 +7,55 @@
 
 #define MAX_SIGNALS 10
 #define SIGNAL_STR_SIZE 32
-#define SCAN_INTERVAL_MS 1000  // Simulated scan every second
+#define SCAN_INTERVAL_MS 1000  // Simulated scan interval in milliseconds
 
 static char scanned_signals[MAX_SIGNALS][SIGNAL_STR_SIZE];
 static uint32_t num_signals = 0;
 static bool running = true;
 
-// Simulated scanning task: every second, "detect" a new signal
+// Simulated scanning task that logs detected signals
 int32_t scan_task(void* p) {
     UNUSED(p);
+    FURI_LOG_I("SCAN", "Scan task started");
     while(running) {
-        // Simulate detecting a signal (in a real app, call the proper scan API)
         if(num_signals < MAX_SIGNALS) {
+            // Use %lu for both values
             snprintf(scanned_signals[num_signals], SIGNAL_STR_SIZE,
-                     "Signal %d @ %lu", num_signals + 1, furi_get_tick());
+                     "Signal %lu @ %lu", (unsigned long)(num_signals + 1), (unsigned long)furi_get_tick());
             num_signals++;
-            FURI_LOG_I("SCAN", "Detected signal %d", num_signals);
+            FURI_LOG_I("SCAN", "Detected signal %lu", (unsigned long)num_signals);
         } else {
-            // Shift the log: remove the oldest and add a new entry at the end.
+            // Shift log entries to remove oldest
             for(uint32_t i = 1; i < MAX_SIGNALS; i++) {
-                strncpy(scanned_signals[i-1], scanned_signals[i], SIGNAL_STR_SIZE);
+                strncpy(scanned_signals[i - 1], scanned_signals[i], SIGNAL_STR_SIZE);
             }
             snprintf(scanned_signals[MAX_SIGNALS - 1], SIGNAL_STR_SIZE,
-                     "Signal %d @ %lu", num_signals + 1, furi_get_tick());
+                     "Signal %lu @ %lu", (unsigned long)(num_signals + 1), (unsigned long)furi_get_tick());
             num_signals++;
             FURI_LOG_I("SCAN", "Log full; added new signal (oldest dropped)");
         }
         furi_delay_ms(SCAN_INTERVAL_MS);
     }
+    FURI_LOG_I("SCAN", "Scan task stopped");
     return 0;
 }
 
-// Input callback to allow exit via the Back button.
+// Input callback to allow exiting the app
 void input_callback(InputEvent* event, void* context) {
     UNUSED(context);
     if(event->type == InputTypeShort && event->key == InputKeyBack) {
         running = false;
-        FURI_LOG_I("INPUT", "Exit button pressed, stopping analyzer");
+        FURI_LOG_I("INPUT", "Back pressed, exiting app");
     }
 }
 
-// Render callback: display scanned signals
+// Render callback: display the log of detected signals
 void render_callback(Canvas* canvas, void* context) {
     UNUSED(context);
     canvas_clear(canvas);
     canvas_draw_str(canvas, 0, 10, "Multi-Protocol Analyzer");
-    
-    // Display log header
     canvas_draw_str(canvas, 0, 20, "Detected Signals:");
     
-    // Draw each signal (if any)
     uint32_t y = 30;
     for(uint32_t i = 0; i < MAX_SIGNALS && i < num_signals; i++) {
         canvas_draw_str(canvas, 0, y, scanned_signals[i]);
@@ -66,39 +65,35 @@ void render_callback(Canvas* canvas, void* context) {
     canvas_draw_str(canvas, 0, y + 10, "Press BACK to exit");
 }
 
-// Main app entry point
+// Main entry point for the app
 int32_t analyzer_app(void* p) {
     UNUSED(p);
     FURI_LOG_I("ANALYZER", "Analyzer App Started");
-
-    // Open GUI and input systems
-    Gui* gui = furi_record_open(RECORD_GUI);
-    Input* input = furi_record_open(RECORD_INPUT);
     
-    // Set up viewport for display
+    // Open the GUI record
+    Gui* gui = furi_record_open(RECORD_GUI);
+    
+    // Allocate and configure the viewport
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, NULL);
     view_port_input_callback_set(view_port, input_callback, NULL);
+    
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     
-    // Set input callback (optional if view_port_input_callback_set works well)
-    input_set_callback(input, input_callback, NULL);
-
-    // Allocate and start a thread to simulate scanning
+    // Start the simulated scan task in a separate thread
     FuriThread* scan_thread = furi_thread_alloc_ex("Scan_Thread", 1024, scan_task, NULL);
     furi_thread_start(scan_thread);
     
-    // Main loop: update UI periodically
+    // Main loop: update UI until the user exits
     while(running) {
         furi_delay_ms(100);
     }
     
-    // Cleanup
+    // Cleanup resources
     furi_thread_free(scan_thread);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
     furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_INPUT);
     
     FURI_LOG_I("ANALYZER", "Analyzer App Exited");
     return 0;
