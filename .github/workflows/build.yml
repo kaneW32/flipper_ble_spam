@@ -38,22 +38,31 @@ jobs:
             exit 1
           fi
 
-      - name: Debug App Folder Existence (Fixed)
+      - name: Fix Folder Name and Debug Existence
         run: |
-          echo "🔍 Checking for folders inside applications_user:"
-          ls -1 ${{ github.workspace }}/applications_user  # List folders exactly as GitHub sees them
-    
-          APP_DIR=$(find ${{ github.workspace }}/applications_user -maxdepth 1 -type d -name "ble_spam" -print -quit)
-    
-          if [ -n "$APP_DIR" ]; then
-            echo "✅ Found ble_spam folder: $APP_DIR"
-            ls -R "$APP_DIR"
+          echo "🔍 Checking and renaming 'ble_spam' if necessary..."
+          
+          # List all folders in applications_user
+          echo "📂 Folders in applications_user:"
+          ls -1 ${{ github.workspace }}/applications_user
+          
+          # Find the folder that looks like "ble_spam"
+          for dir in "${{ github.workspace }}/applications_user"/*; do
+            if [[ "$(basename "$dir")" != "ble_spam" ]]; then
+              echo "⚠️ Found a possible wrong folder: '$dir'"
+              mv "$dir" "${{ github.workspace }}/applications_user/ble_spam"
+              echo "✅ Renamed '$dir' to 'ble_spam'"
+            fi
+          done
+          
+          # Verify the folder now exists
+          if [ -d "${{ github.workspace }}/applications_user/ble_spam" ]; then
+            echo "✅ Final check: ble_spam exists!"
+            ls -R "${{ github.workspace }}/applications_user/ble_spam"
           else
-            echo "❌ ERROR: applications_user/ble_spam folder is MISSING!"
+            echo "❌ ERROR: applications_user/ble_spam folder is STILL MISSING!"
             exit 1
           fi
-
-
 
       - name: Move App to Firmware Directory
         run: |
