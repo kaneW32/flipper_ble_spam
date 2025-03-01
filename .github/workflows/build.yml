@@ -21,26 +21,34 @@ jobs:
 
       - name: Debug Workspace Structure
         run: |
-          echo "Listing all files in the workspace:"
+          echo "🔍 Listing all files in the workspace:"
           ls -R ${{ github.workspace }}
 
       - name: Debug Applications User Folder
         run: |
-          if [ -d "${{ github.workspace }}/applications_user" ]; then
-            echo "applications_user exists!"
-            ls -R ${{ github.workspace }}/applications_user
+          APP_USER_DIR="${{ github.workspace }}/applications_user"
+          echo "🔍 Checking for applications_user directory: $APP_USER_DIR"
+          ls -ld "$APP_USER_DIR" || echo "❌ Directory not found"
+
+          if [ -d "$APP_USER_DIR" ]; then
+            echo "✅ applications_user folder exists!"
+            ls -R "$APP_USER_DIR"
           else
-            echo "ERROR: applications_user folder is MISSING!"
+            echo "❌ ERROR: applications_user folder is MISSING!"
             exit 1
           fi
 
-      - name: Debug App Folder Existence
+      - name: Debug App Folder Existence (Fixed)
         run: |
-          if [ -d "${{ github.workspace }}/applications_user/ble_spam" ]; then
-            echo "ble_spam exists!"
-            ls -R ${{ github.workspace }}/applications_user/ble_spam
+          APP_DIR="${{ github.workspace }}/applications_user/ble_spam"
+          echo "🔍 Checking for application directory: $APP_DIR"
+          ls -ld "$APP_DIR" || echo "❌ Directory not found"
+
+          if [ -d "$APP_DIR" ]; then
+            echo "✅ ble_spam folder exists!"
+            ls -R "$APP_DIR"
           else
-            echo "ERROR: applications_user/ble_spam folder is MISSING!"
+            echo "❌ ERROR: applications_user/ble_spam folder is MISSING!"
             exit 1
           fi
 
@@ -48,7 +56,7 @@ jobs:
         run: |
           mkdir -p ~/flipperzero-firmware/applications_user
           cp -r ${{ github.workspace }}/applications_user/ble_spam ~/flipperzero-firmware/applications_user/
-          echo "Listing files after moving:"
+          echo "✅ Listing files after moving:"
           ls -R ~/flipperzero-firmware/applications_user
 
       - name: Build App
