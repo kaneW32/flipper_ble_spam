@@ -26,29 +26,34 @@ jobs:
 
       - name: Debug Applications User Folder
         run: |
-          APP_USER_DIR="${{ github.workspace }}/applications_user"
-          echo "🔍 Checking for applications_user directory: $APP_USER_DIR"
-          ls -ld "$APP_USER_DIR" || echo "❌ Directory not found"
-          if [ -d "$APP_USER_DIR" ]; then
-            echo "✅ applications_user folder exists!"
-            ls -R "$APP_USER_DIR"
-          else
-            echo "❌ ERROR: applications_user folder is MISSING!"
-            exit 1
-          fi
+          echo "🔍 Checking for applications_user directory:"
+          ls -ld ${{ github.workspace }}/applications_user || exit 1
+          echo "📂 Listing contents of applications_user:"
+          ls -R ${{ github.workspace }}/applications_user
+
+      - name: Fix Folder Names in applications_user
+        run: |
+          echo "🔍 Fixing folder names in applications_user..."
+          for dir in "${{ github.workspace }}/applications_user"/*; do
+            base=$(basename "$dir")
+            trimmed=$(echo "$base" | tr -d '[:space:]')
+            if [ "$base" != "$trimmed" ]; then
+              echo "⚠️ Renaming '$base' to '$trimmed'"
+              mv "$dir" "${{ github.workspace }}/applications_user/$trimmed"
+            else
+              echo "✅ No change needed for '$base'"
+            fi
+          done
+          echo "✅ After renaming, listing contents of applications_user:"
+          ls -R ${{ github.workspace }}/applications_user
 
       - name: Debug App Folder Existence (Fixed)
         run: |
           APP_DIR="${{ github.workspace }}/applications_user/ble_spam"
           echo "🔍 Checking for application directory: $APP_DIR"
-          ls -ld "$APP_DIR" || echo "❌ Directory not found"
-          if [ -d "$APP_DIR" ]; then
-            echo "✅ ble_spam folder exists!"
-            ls -R "$APP_DIR"
-          else
-            echo "❌ ERROR: applications_user/ble_spam folder is MISSING!"
-            exit 1
-          fi
+          ls -ld "$APP_DIR" || { echo "❌ Directory not found"; exit 1; }
+          echo "✅ Listing contents of $APP_DIR:"
+          ls -R "$APP_DIR"
 
       - name: Move App to Firmware Directory
         run: |
