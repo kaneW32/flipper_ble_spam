@@ -6,8 +6,7 @@
 #define DEFAULT_SPAM_RATE 500
 
 // Fallback stub for furi_hal_bt_send_adv.
-// Since the function isn't defined in your SDK, we provide a stub.
-// Remove this if your SDK later provides a proper implementation.
+// If your SDK does not provide this function, the fallback marks parameters as unused.
 #ifndef furi_hal_bt_send_adv
 void furi_hal_bt_send_adv(const char* name, uint32_t len, bool enable) {
     UNUSED(name);
@@ -29,7 +28,7 @@ void ble_spam_task(void* p) {
 }
 
 // The main entry point for the app.
-// Note: We run the spam task directly (on the main thread) as threading is not available.
+// Note: Running the task directly on the main thread as threading isn't available.
 int32_t ble_spam_app(void* p) {
     UNUSED(p);
     Gui* gui = furi_record_open(RECORD_GUI);
