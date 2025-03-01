@@ -1,8 +1,8 @@
 App(
-    appid="ble_spam",
-    name="BLE Spam",
+    appid="analyzer",
+    name="Signal Analyzer",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="ble_spam_app",
+    entry_point="analyzer_app",
     stack_size=1024,
     requires=["gui", "input"],
     fap_category="Tools"
