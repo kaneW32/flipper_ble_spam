@@ -24,13 +24,14 @@ void input_callback(InputEvent* event, void* context) {
     }
 }
 
-// The BLE spam task runs in a separate thread
-void ble_spam_task(void* p) {
+// ✅ FIXED: `int32_t` return type for `furi_thread_alloc_ex`
+int32_t ble_spam_task(void* p) {
     UNUSED(p);
     while(running) {
         furi_hal_bt_send_adv("Flipper_BLE_Spam", 16, true);
         furi_delay_ms(spam_rate);
     }
+    return 0;  // ✅ Must return an int32_t value
 }
 
 // UI rendering function
@@ -62,7 +63,7 @@ int32_t ble_spam_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
     input_set_callback(input, input_callback, NULL);
 
-    // Start BLE spam in a separate thread ✅ Fixed thread creation
+    // Start BLE spam in a separate thread ✅ FIXED: Function signature
     FuriThread* spam_thread = furi_thread_alloc_ex("BLE_Spam_Thread", 1024, ble_spam_task, NULL);
     furi_thread_start(spam_thread);
 
