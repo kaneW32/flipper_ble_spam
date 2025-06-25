@@ -1,79 +1,57 @@
 name: Build Flipper App
 
 on:
+  # Build on every push, pull-request, or manual trigger
   push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      # 1) Pull your repo
+      - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      # 2) System packages & ufbt (optional helper)
+      - name: 🛠️ Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y git cmake gcc-arm-none-eabi build-essential python3-pip
+          sudo apt install -y git cmake build-essential gcc-arm-none-eabi python3-pip
+          pip install --upgrade ufbt   # makes building external apps easier
 
-      - name: Clone Flipper SDK
-        run: git clone --recursive --branch 1.2.0 https://github.com/flipperdevices/flipperzero-firmware.git ~/flipperzero-firmware
-
-      - name: Debug Workspace Structure
+      # 3) Clone official firmware (dev = newest; change to a tag for a specific version)
+      - name: 🐬 Clone Flipper firmware
         run: |
-          echo "🔍 Listing all files in the workspace:"
-          ls -R ${{ github.workspace }}
+          git clone --depth 1 --branch dev --recursive \
+          https://github.com/flipperdevices/flipperzero-firmware.git \
+          ~/flipperzero-firmware
 
-      - name: Debug Applications User Folder
-        run: |
-          echo "🔍 Checking for applications_user directory:"
-          ls -ld ${{ github.workspace }}/applications_user || exit 1
-          echo "📂 Listing contents of applications_user:"
-          ls -R ${{ github.workspace }}/applications_user
-
-      - name: Fix Folder Names in applications_user
-        run: |
-          echo "🔍 Fixing folder names in applications_user..."
-          for dir in "${{ github.workspace }}/applications_user"/*; do
-            base=$(basename "$dir")
-            trimmed=$(echo "$base" | tr -d '[:space:]')
-            if [ "$base" != "$trimmed" ]; then
-              echo "⚠️ Renaming '$base' to '$trimmed'"
-              mv "$dir" "${{ github.workspace }}/applications_user/$trimmed"
-            else
-              echo "✅ No change needed for '$base'"
-            fi
-          done
-          echo "✅ After renaming, listing contents of applications_user:"
-          ls -R ${{ github.workspace }}/applications_user
-
-      - name: Debug App Folder Existence (Fixed)
-        run: |
-          APP_DIR="${{ github.workspace }}/applications_user/ble_spam"
-          echo "🔍 Checking for application directory: $APP_DIR"
-          ls -ld "$APP_DIR" || { echo "❌ Directory not found"; exit 1; }
-          echo "✅ Listing contents of $APP_DIR:"
-          ls -R "$APP_DIR"
-
-      - name: Move App to Firmware Directory
+      # 4) Copy your app into firmware/applications_user/
+      - name: 📂 Copy external app
         run: |
           mkdir -p ~/flipperzero-firmware/applications_user
-          cp -r ${{ github.workspace }}/applications_user/ble_spam ~/flipperzero-firmware/applications_user/
-          echo "✅ Listing files after moving:"
-          ls -R ~/flipperzero-firmware/applications_user
+          # adjust path if your app folder is elsewhere
+          cp -r ${{ github.workspace }}/applications_user/ble_spam \
+                ~/flipperzero-firmware/applications_user/
 
-      - name: Build App
+      # 5) Build with fbt
+      - name: 🔨 Build .app
         run: |
           cd ~/flipperzero-firmware
           ./fbt build APPSRC=applications_user/ble_spam
 
-      - name: Find Built .fap File
+      # 6) Locate .fap (prints path for verification)
+      - name: 🔍 Locate .fap
         run: |
-          echo "🔍 Searching for .fap files..."
+          echo "Built .fap files:"
           find ~/flipperzero-firmware -type f -name "*.fap"
 
-      - name: Upload .fap File
+      # 7) Upload artifact
+      - name: 📤 Upload .FAP
         uses: actions/upload-artifact@v4
         with:
           name: ble_spam_fap
-          path: /home/runner/flipperzero-firmware/build/f7-firmware-D/.extapps/analyzer.fap
+          path: ~/flipperzero-firmware/build/f7-firmware-D/.extapps/*.fap
